@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard | Phishing Reporting Portal</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <span class="brand-icon">🛡</span>
+        <span>PhishGuard</span>
+    </div>
+    <nav>
+        <a href="#report">Report</a>
+        <a href="#track">Track Report</a>
+        <a href="#history">Recent Reports</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <div class="hero-content">
+        <span class="eyebrow">CYBERSECURITY AWARENESS</span>
+        <h1>Stay Safe.<br><span>Stop Phishing.</span></h1>
+        <p>
+            Report suspicious websites, phishing emails, and messages.
+            Help make the internet safer for everyone.
+        </p>
+        <a class="primary-button" href="#report">Report a Threat</a>
+    </div>
+
+    <div class="shield-art">🛡️</div>
+</section>
+
+<main class="container">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="notice {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if submitted_id %}
+        <section class="success-card">
+            <h2>Report Submitted Successfully!</h2>
+            <p>Your complaint ID is:</p>
+            <div class="complaint-id">{{ submitted_id }}</div>
+            <p>Save this ID to track your report later.</p>
+        </section>
+    {% endif %}
+
+    <section class="section-heading" id="report">
+        <span class="eyebrow">TAKE ACTION</span>
+        <h2>Report a Suspicious Activity</h2>
+        <p>Provide the details below so the suspicious activity can be recorded.</p>
+    </section>
+
+    <section class="panel">
+        <form action="{{ url_for('submit_report') }}" method="POST">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="reporter_name">Your Name *</label>
+                    <input type="text" id="reporter_name"
+                           name="reporter_name" maxlength="100" required>
+                </div>
+
+                <div class="field">
+                    <label for="reporter_email">Email Address *</label>
+                    <input type="email" id="reporter_email"
+                           name="reporter_email" maxlength="254" required>
+                </div>
+
+                <div class="field">
+                    <label for="report_type">Type of Report *</label>
+                    <select id="report_type" name="report_type" required>
+                        <option value="">Select report type</option>
+                        <option value="Phishing Website">Phishing Website</option>
+                        <option value="Phishing Email">Phishing Email</option>
+                        <option value="Suspicious Message">Suspicious Message</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="suspicious_url">Suspicious URL (optional)</label>
+                    <input type="text" id="suspicious_url"
+                           name="suspicious_url" maxlength="2048"
+                           placeholder="https://example.com">
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="description">Description of the Incident *</label>
+                <textarea id="description" name="description"
+                          rows="5" maxlength="5000"
+                          placeholder="Describe the suspicious email, website, or message..."
+                          required></textarea>
+            </div>
+
+            <button class="primary-button" type="submit">
+                Submit Report
+            </button>
+        </form>
+    </section>
+
+    <section class="section-heading" id="track">
+        <span class="eyebrow">CHECK PROGRESS</span>
+        <h2>Track Your Report</h2>
+        <p>Enter the complaint ID you received after submitting your report.</p>
+    </section>
+
+    <section class="panel">
+        <form action="{{ url_for('track_report') }}" method="POST"
+              class="track-form">
+            <div class="field">
+                <label for="complaint_id">Complaint ID</label>
+                <input type="text" id="complaint_id" name="complaint_id"
+                       placeholder="Example: PG-A1B2C3D4" required>
+            </div>
+            <button class="primary-button" type="submit">Track Status</button>
+        </form>
+
+        {% if tracked_report %}
+            <div class="tracking-result">
+                <h3>Report Details</h3>
+                <p><strong>Complaint ID:</strong>
+                    {{ tracked_report["complaint_id"] }}</p>
+                <p><strong>Report Type:</strong>
+                    {{ tracked_report["report_type"] }}</p>
+                <p><strong>Status:</strong>
+                    <span class="status">{{ tracked_report["status"] }}</span>
+                </p>
+                <p><strong>Date Submitted:</strong>
+                    {{ tracked_report["created_at"] }}</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="section-heading" id="history">
+        <span class="eyebrow">DATABASE RECORDS</span>
+        <h2>Recent Reports</h2>
+        <p>Latest reports recorded by this demonstration application.</p>
+    </section>
+
+    <section class="panel table-panel">
+        {% if reports %}
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Complaint ID</th>
+                            <th>Report Type</th>
+                            <th>Status</th>
+                            <th>Date Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                            <tr>
+                                <td>{{ report["complaint_id"] }}</td>
+                                <td>{{ report["report_type"] }}</td>
+                                <td><span class="status">{{ report["status"] }}</span></td>
+                                <td>{{ report["created_at"] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty-state">No reports have been submitted yet.</p>
+        {% endif %}
+    </section>
+
+</main>
+
+<footer>
+    <p>PhishGuard — Phishing Website and Email Reporting Portal</p>
+    <p class="footer-small">Educational project for cybersecurity awareness.</p>
+</footer>
+
+</body>
+</html>
